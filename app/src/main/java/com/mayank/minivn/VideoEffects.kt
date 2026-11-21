@@ -12,6 +12,7 @@ import androidx.media3.effect.Contrast
 import androidx.media3.effect.OverlayEffect
 import androidx.media3.effect.RgbAdjustment
 import androidx.media3.effect.RgbFilter
+import androidx.media3.effect.StaticOverlaySettings
 import androidx.media3.effect.TextOverlay
 import com.google.common.collect.ImmutableList
 
@@ -63,7 +64,13 @@ fun buildFilterEffects(filter: VideoFilter): List<Effect> {
 }
 
 @UnstableApi
-fun buildExportEffects(filter: VideoFilter, overlayText: String): List<Effect> {
+fun buildExportEffects(
+    filter: VideoFilter,
+    overlayText: String,
+    textAnchorX: Float,
+    textAnchorY: Float,
+    textScale: Float
+): List<Effect> {
     val effects = buildFilterEffects(filter).toMutableList()
 
     if (overlayText.isNotBlank()) {
@@ -81,13 +88,19 @@ fun buildExportEffects(filter: VideoFilter, overlayText: String): List<Effect> {
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
             setSpan(
-                RelativeSizeSpan(2.2f),
+                RelativeSizeSpan(2.0f),
                 0,
                 length,
                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
         }
-        val textOverlay = TextOverlay.createStaticTextOverlay(spannable)
+        val settings = StaticOverlaySettings.Builder()
+            .setBackgroundFrameAnchor(textAnchorX, textAnchorY)
+            .setOverlayFrameAnchor(0f, 0f)
+            .setScale(textScale, textScale)
+            .build()
+
+        val textOverlay = TextOverlay.createStaticTextOverlay(spannable, settings)
         effects.add(OverlayEffect(ImmutableList.of(textOverlay)))
     }
 
